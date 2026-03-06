@@ -868,32 +868,76 @@
   </section>
 
   <!-- COTIDIANO -->
-  <section id="cotidiano" style="padding: 6rem 4rem; max-width: 1200px; margin: 0 auto;">
+  <section id="cotidiano" style="padding: 6rem 4rem; max-width: 1400px; margin: 0 auto;">
     <div class="section-header reveal" style="text-align:left; padding-left:0;">
       <p class="section-tag">Día a día</p>
       <h2 class="section-title">Vida en <em>México</em></h2>
       <div class="section-divider" style="margin-left:0;"></div>
+      <p style="margin-top:1rem; color:#6b5040; font-size:0.95rem;">Ciudad de México — fotos do cotidiano</p>
     </div>
 
-    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem;">
+    <!-- LIGHTBOX -->
+    <div id="lightbox" onclick="closeLightbox()" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:10000; align-items:center; justify-content:center; cursor:zoom-out;">
+      <img id="lightbox-img" src="" style="max-width:90vw; max-height:90vh; object-fit:contain; box-shadow: 0 0 80px rgba(0,0,0,0.8);" />
+    </div>
 
-      <!-- FOTO 1 -->
-      <div class="reveal" style="position:relative; overflow:hidden; background:var(--dark);">
-        <img
-          src="https://lh3.googleusercontent.com/pw/AP1GczMtbOhGjYJHtiyrk4IlYl7AWKWO2kwn348frmc0gbcQdVUaafYWRHwCeEGKn-e1ohM_QV6Ia-mrvjocWLPj0Z_gXH81fyuT0wFMmmnwh5ZBN0cCOOat=w800"
-          alt="En casa, Ciudad de México"
-          style="width:100%; height:280px; object-fit:cover; display:block; transition: transform 0.5s ease;"
-          onmouseover="this.style.transform='scale(1.04)'"
-          onmouseout="this.style.transform='scale(1)'"
-        />
-        <div style="padding: 1.2rem 1.5rem; background: var(--dark);">
-          <p style="font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:0.3rem;">Ciudad de México</p>
-          <p style="font-family:'Playfair Display',serif; font-size:1rem; color:var(--cream);">En casa 🏠</p>
-        </div>
+    <!-- GRADE MOSAICO -->
+    <div style="columns: 3; column-gap: 1rem; margin-top: 3rem;" id="gallery-cdmx">
+
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczMtbOhGjYJHtiyrk4IlYl7AWKWO2kwn348frmc0gbcQdVUaafYWRHwCeEGKn-e1ohM_QV6Ia-mrvjocWLPj0Z_gXH81fyuT0wFMmmnwh5ZBN0cCOOat=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczMtbOhGjYJHtiyrk4IlYl7AWKWO2kwn348frmc0gbcQdVUaafYWRHwCeEGKn-e1ohM_QV6Ia-mrvjocWLPj0Z_gXH81fyuT0wFMmmnwh5ZBN0cCOOat=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
       </div>
 
-      <!-- MAIS FOTOS VÃO AQUI -->
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczOE0PmmeVnSHy31ssMsn899X59xphGpU8hFs6H8ESw1z3idLtLWIuDUwWxEwMQnc-yXm1tFCghQTonQ69WB10XcNUWGMa7Jc6qHH6yP8FkckETk-cT-=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczOE0PmmeVnSHy31ssMsn899X59xphGpU8hFs6H8ESw1z3idLtLWIuDUwWxEwMQnc-yXm1tFCghQTonQ69WB10XcNUWGMa7Jc6qHH6yP8FkckETk-cT-=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>
 
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczP3cf3bmMThTP9zh0u23NxU0E8ld58mJrqSkwu6GpxKUZPJKds6l3VMjUIrgHH1ph8bVcPbn2XogVzpRjzkkmfUTe-RfU0ykz9xZpiJ2b7VBBZck3Xl=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczP3cf3bmMThTP9zh0u23NxU0E8ld58mJrqSkwu6GpxKUZPJKds6l3VMjUIrgHH1ph8bVcPbn2XogVzpRjzkkmfUTe-RfU0ykz9xZpiJ2b7VBBZck3Xl=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>
+
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczMqPjpW0EZ9gmOudEmExu4EXAVq6UKzN_pqwDgW8w4gMYGRdRdUCQS1jNu5uT01PCXEY0er2MpGVScJcX2OvwkHVefr0PNUJodSOwKnKQCaHa3tIodg=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczMqPjpW0EZ9gmOudEmExu4EXAVq6UKzN_pqwDgW8w4gMYGRdRdUCQS1jNu5uT01PCXEY0er2MpGVScJcX2OvwkHVefr0PNUJodSOwKnKQCaHa3tIodg=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>
+
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczNDQORPm14LqMpZUmQzZqmdvAhAezQK7wZcuDdyep7LXQlleickQh_qnax34AZAv26J00GMoMH9GRizqfIjtnuMXnb7fHLkKh8RpSz1rg_o30K_Vv7R=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczNDQORPm14LqMpZUmQzZqmdvAhAezQK7wZcuDdyep7LXQlleickQh_qnax34AZAv26J00GMoMH9GRizqfIjtnuMXnb7fHLkKh8RpSz1rg_o30K_Vv7R=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>
+
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczM-7Fm2goQz7e3YCVKpB6cPlYkDfkCPIfu1Hp8g1GtQ1PUMfptueWFxrNhjW93sf33Z5JAlxC9iwo23B_cwaffcrQkOTt6Arb_UydrUiuvyfMELk_rn=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczM-7Fm2goQz7e3YCVKpB6cPlYkDfkCPIfu1Hp8g1GtQ1PUMfptueWFxrNhjW93sf33Z5JAlxC9iwo23B_cwaffcrQkOTt6Arb_UydrUiuvyfMELk_rn=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>
+
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczOc9ovSSgLJy-eWOf9GNCzzWGLJ0O3VPNrpI1PSPsWLMDT6b7r3F1jd9D6HOJqnYaA2x6AMZbEGLS2X3GWElJKrjpvPt0D5UA7bgjY68e7ZFOl2pcIs=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczOc9ovSSgLJy-eWOf9GNCzzWGLJ0O3VPNrpI1PSPsWLMDT6b7r3F1jd9D6HOJqnYaA2x6AMZbEGLS2X3GWElJKrjpvPt0D5UA7bgjY68e7ZFOl2pcIs=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>
+
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczNcL8_fb4VXHgasvEAbOMitOnvSy3NDJup3Wkw4Xjk52YChWFyx0P70QzjDjnNPL_lIdF4brdzKxC_PfYy8PmZ6OItfCC0jeKac5MIT6HPDuWGJJ6RE=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczNcL8_fb4VXHgasvEAbOMitOnvSy3NDJup3Wkw4Xjk52YChWFyx0P70QzjDjnNPL_lIdF4brdzKxC_PfYy8PmZ6OItfCC0jeKac5MIT6HPDuWGJJ6RE=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>
+
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczMWpdrUo6NDSJbbvKfyIWUALzavR8CLV69HKZ5i7H0snnVrhoF4T69wnFGJK57OCABA6BTcVhr6HAOIqLmTYsXbrw3xPT-fgJhyp6_CqW3W9PKIPWXm=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczMWpdrUo6NDSJbbvKfyIWUALzavR8CLV69HKZ5i7H0snnVrhoF4T69wnFGJK57OCABA6BTcVhr6HAOIqLmTYsXbrw3xPT-fgJhyp6_CqW3W9PKIPWXm=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>
+
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczNaudFm3EFYs19ZnSTqhK2rZQeoo6gDdMa9hfdYRyN2zCgehynbY-NVPEqHpev_2MHBQvUH1q_JwDv6JsAHyCtaoLe4trBxeGG5VxzI3cd-SXZQXG_O=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczNaudFm3EFYs19ZnSTqhK2rZQeoo6gDdMa9hfdYRyN2zCgehynbY-NVPEqHpev_2MHBQvUH1q_JwDv6JsAHyCtaoLe4trBxeGG5VxzI3cd-SXZQXG_O=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>
+
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczOMw1CKswZmryyYaM7Y5SS3RoutJyyEejFfPVH2Y58AkDypgHCvfbZsTimx7FRr-90jmgayYSqhIIFIshxIIprYIwM_CpRMWAFWloA4iFHV1ZrDUNYr=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczOMw1CKswZmryyYaM7Y5SS3RoutJyyEejFfPVH2Y58AkDypgHCvfbZsTimx7FRr-90jmgayYSqhIIFIshxIIprYIwM_CpRMWAFWloA4iFHV1ZrDUNYr=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>
+
+      <div class="reveal" style="break-inside:avoid; margin-bottom:1rem; overflow:hidden; cursor:zoom-in;" onclick="openLightbox('https://lh3.googleusercontent.com/pw/AP1GczPO6SQ2acYnDhLH_gp-qJ7WjoFxRzqRjzLNuD0n_naqquivh9YBcWNRkq0cjiUbbS4AM887Wk9X5g1WdqHda4GW8N2C7-Ah0Z_n5NyKPvE_1LmKlB0J=w1200')">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczPO6SQ2acYnDhLH_gp-qJ7WjoFxRzqRjzLNuD0n_naqquivh9YBcWNRkq0cjiUbbS4AM887Wk9X5g1WdqHda4GW8N2C7-Ah0Z_n5NyKPvE_1LmKlB0J=w600" style="width:100%; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
+      </div>
+
+    </div>
+
+    <div style="text-align:center; margin-top:2rem;">
+      <a href="https://photos.app.goo.gl/LiEGD8JweXQ4tbA46" target="_blank" style="display:inline-block; padding:0.9rem 2.5rem; background:var(--terracotta); color:var(--cream); text-decoration:none; font-size:0.8rem; letter-spacing:0.15em; text-transform:uppercase; transition:background 0.3s;" onmouseover="this.style.background='var(--dark)'" onmouseout="this.style.background='var(--terracotta)'">
+        Ver álbum completo no Google Fotos →
+      </a>
     </div>
   </section>
 
@@ -905,6 +949,17 @@
   </footer>
 
   <script>
+    // Lightbox
+    function openLightbox(src) {
+      const lb = document.getElementById('lightbox');
+      document.getElementById('lightbox-img').src = src;
+      lb.style.display = 'flex';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').style.display = 'none';
+    }
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLightbox(); });
+
     // Scroll reveal
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
