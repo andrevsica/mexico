@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fierro Viejo y Familia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Fira+Sans:wght@300;400;500&family=Abril+Fatface&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <style>
+    :root {
+      --terracotta: #C8553D;
+      --gold: #E8A838;
+      --cream: #F5EDD8;
+      --dark: #1A1208;
+      --dark2: #221a0e;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--dark); color: var(--cream); font-family: 'Fira Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+      position: relative; overflow: hidden; padding: 4rem 2rem;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 25% 40%, rgba(200,85,61,0.28) 0%, transparent 55%),
+        radial-gradient(ellipse at 75% 65%, rgba(232,168,56,0.16) 0%, transparent 50%);
+    }
+    .hero-shape1 { position:absolute; top:-100px; right:-100px; width:500px; height:500px; border:1px solid rgba(232,168,56,0.06); border-radius:50%; pointer-events:none; }
+    .hero-shape2 { position:absolute; bottom:-80px; left:-80px; width:350px; height:350px; border:1px solid rgba(200,85,61,0.07); transform:rotate(45deg); pointer-events:none; }
+    .hero-content { position: relative; z-index: 2; }
+    .hero-flags { font-size:1.6rem; margin-bottom:2rem; letter-spacing:0.5rem; opacity:0; animation:fadeUp 1s ease 0.2s forwards; }
+    .hero-title {
+      font-family: 'Abril Fatface', serif;
+      font-size: clamp(3rem, 9vw, 7.5rem);
+      line-height: 0.95; color: var(--cream);
+      opacity: 0; animation: fadeUp 1s ease 0.4s forwards;
+    }
+    .hero-title .y { font-family:'Playfair Display',serif; font-style:italic; color:var(--terracotta); font-size:0.7em; }
+    .hero-title .familia { color:var(--gold); display:block; }
+    .hero-sub { font-size:0.85rem; letter-spacing:0.2em; text-transform:uppercase; color:rgba(245,237,216,0.4); margin-top:1.5rem; opacity:0; animation:fadeUp 1s ease 0.7s forwards; }
+    .hero-scroll {
+      position:absolute; bottom:2.5rem; left:50%; transform:translateX(-50%);
+      display:flex; flex-direction:column; align-items:center; gap:0.5rem;
+      font-size:0.7rem; letter-spacing:0.2em; text-transform:uppercase;
+      color:rgba(245,237,216,0.2); opacity:0; animation:fadeUp 1s ease 1.2s forwards;
+    }
+    .hero-scroll::after { content:''; width:1px; height:40px; background:rgba(245,237,216,0.15); animation:scrollLine 2s ease-in-out infinite; }
+    @keyframes scrollLine { 0%,100%{opacity:.2;transform:scaleY(1)} 50%{opacity:.5;transform:scaleY(1.3)} }
+
+    /* ── SECTION HEADER ── */
+    .sec-header {
+      max-width: 1400px; margin: 0 auto;
+      padding: 5rem 3rem 2.5rem;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      border-bottom: 1px solid rgba(245,237,216,0.06);
+    }
+    .sec-tag { font-size:0.7rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--gold); margin-bottom:0.6rem; }
+    .sec-title { font-family:'Playfair Display',serif; font-size:clamp(2rem,4vw,3.2rem); font-weight:700; color:var(--cream); line-height:1; }
+    .sec-title em { font-style:italic; color:var(--terracotta); }
+    .sec-count { font-size:0.75rem; color:rgba(245,237,216,0.25); letter-spacing:0.1em; white-space:nowrap; }
+
+    /* ── GALLERY ── */
+    .gallery-wrap { padding: 3px 3rem 5rem; max-width:1400px; margin:0 auto; }
+    .gallery-mosaic { columns:4; column-gap:3px; }
+    .gallery-item { break-inside:avoid; margin-bottom:3px; overflow:hidden; cursor:zoom-in; position:relative; }
+    .gallery-item img { width:100%; display:block; transition:transform 0.5s ease, filter 0.4s ease; filter:brightness(0.85); }
+    .gallery-item:hover img { transform:scale(1.05); filter:brightness(0.55); }
+    .gallery-item-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s; }
+    .gallery-item:hover .gallery-item-overlay { opacity:1; }
+    .gallery-item-overlay span { width:38px; height:38px; border-radius:50%; border:1.5px solid rgba(245,237,216,0.5); display:flex; align-items:center; justify-content:center; font-size:1.1rem; color:var(--cream); }
+
+    /* ── LIGHTBOX ── */
+    #lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.96); z-index:9999; align-items:center; justify-content:center; }
+    #lightbox.open { display:flex; }
+    #lightbox-img { max-width:92vw; max-height:92vh; object-fit:contain; animation:zoomIn 0.25s ease; transition:opacity 0.15s ease; }
+    @keyframes zoomIn { from{opacity:0;transform:scale(0.94)} to{opacity:1;transform:scale(1)} }
+    .lb-close { position:fixed; top:1.5rem; right:1.5rem; width:44px; height:44px; border-radius:50%; background:rgba(245,237,216,0.08); border:1px solid rgba(245,237,216,0.15); display:flex; align-items:center; justify-content:center; color:var(--cream); font-size:1rem; cursor:pointer; z-index:10000; transition:background 0.3s; }
+    .lb-close:hover { background:rgba(245,237,216,0.18); }
+    .lb-nav { position:fixed; top:50%; transform:translateY(-50%); width:48px; height:48px; border-radius:50%; background:rgba(245,237,216,0.08); border:1px solid rgba(245,237,216,0.15); display:flex; align-items:center; justify-content:center; color:var(--cream); font-size:1.3rem; cursor:pointer; z-index:10000; transition:background 0.3s; }
+    .lb-nav:hover { background:rgba(245,237,216,0.18); }
+    .lb-prev { left:1.5rem; } .lb-next { right:1.5rem; }
+    .lb-counter { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); font-size:0.75rem; letter-spacing:0.15em; color:rgba(245,237,216,0.3); z-index:10000; }
+
+    /* ── MAP ── */
+    .map-wrap { padding: 0 3rem; max-width:1400px; margin:0 auto; }
+    .map-box { height:420px; border:1px solid rgba(245,237,216,0.07); overflow:hidden; margin-bottom: 0; }
+    #leaflet-map { width:100%; height:100%; }
+
+    /* ── TIMELINE ── */
+    .timeline-wrap { padding: 0 3rem 8rem; max-width:1400px; margin:0 auto; }
+
+    .year-block { margin-top: 2.5rem; }
+    .year-label { font-family:'Abril Fatface',serif; font-size:clamp(3rem,5vw,4.5rem); color:rgba(245,237,216,0.05); line-height:1; margin-bottom:-0.5rem; padding-left:88px; user-select:none; pointer-events:none; }
+
+    .trip-row { display:grid; grid-template-columns:80px 1fr; border-bottom:1px solid rgba(245,237,216,0.05); text-decoration:none; position:relative; }
+    .trip-row::before { content:''; position:absolute; left:79px; top:0; bottom:0; width:1px; background:rgba(245,237,216,0.06); }
+    .trip-date { font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color:rgba(245,237,216,0.22); padding:1.3rem 1rem 1.3rem 0; text-align:right; line-height:1.4; }
+    .trip-content { padding:1.1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; transition:background 0.3s; position:relative; }
+    .trip-content::before { content:''; position:absolute; left:-5px; top:50%; transform:translateY(-50%); width:9px; height:9px; border-radius:50%; background:var(--dark); border:1.5px solid rgba(245,237,216,0.15); transition:background 0.3s, border-color 0.3s; }
+
+    a.trip-row:hover .trip-content { background:rgba(245,237,216,0.03); }
+    a.trip-row:hover .trip-content::before { background:var(--gold); border-color:var(--gold); }
+    a.trip-row:hover .trip-name { color:var(--gold); }
+    a.trip-row:hover .trip-arrow { color:var(--gold); transform:translateX(5px); }
+
+    .trip-info { display:flex; flex-direction:column; gap:0.2rem; }
+    .trip-name { font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:var(--cream); transition:color 0.3s; line-height:1.2; }
+    .trip-place { font-size:0.72rem; color:rgba(245,237,216,0.28); }
+    .trip-right { display:flex; align-items:center; gap:1rem; flex-shrink:0; }
+    .trip-soon { font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase; padding:0.2rem 0.7rem; border:1px solid rgba(232,168,56,0.2); color:rgba(232,168,56,0.4); white-space:nowrap; }
+    .trip-arrow { font-size:0.9rem; color:rgba(245,237,216,0.15); transition:color 0.3s, transform 0.3s; }
+
+    /* ── FOOTER ── */
+    footer { border-top:1px solid rgba(245,237,216,0.06); padding:3rem; text-align:center; }
+    .footer-logo { font-family:'Abril Fatface',serif; font-size:1.2rem; color:var(--gold); opacity:0.5; }
+    .footer-text { font-size:0.75rem; color:rgba(245,237,216,0.18); margin-top:0.5rem; letter-spacing:0.1em; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(25px)} to{opacity:1;transform:translateY(0)} }
+    .reveal { opacity:0; transform:translateY(18px); transition:opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+
+    /* ── LEAFLET ── */
+    .leaflet-popup-content-wrapper { background:var(--cream); border-radius:2px; box-shadow:0 4px 20px rgba(0,0,0,0.5); }
+    .leaflet-popup-tip { background:var(--cream); }
+    .leaflet-control-zoom a { background:var(--dark2) !important; color:var(--gold) !important; border-color:rgba(245,237,216,0.1) !important; }
+    .leaflet-control-zoom a:hover { background:#2e2010 !important; }
+    .leaflet-control-attribution { background:rgba(26,18,8,0.8) !important; color:rgba(245,237,216,0.25) !important; font-size:9px; }
+    .leaflet-control-attribution a { color:rgba(245,237,216,0.35) !important; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:1100px) { .gallery-mosaic { columns:3; } }
+    @media (max-width:768px) {
+      .sec-header { padding:3rem 1.5rem 1.5rem; flex-direction:column; align-items:flex-start; gap:0.5rem; }
+      .gallery-wrap { padding:3px 1rem 3rem; }
+      .gallery-mosaic { columns:2; }
+      .map-wrap, .timeline-wrap { padding-left:1.5rem; padding-right:1.5rem; }
+      .map-box { height:280px; }
+      .year-label { padding-left:70px; font-size:2.5rem; }
+    }
+    @media (max-width:480px) { .gallery-mosaic { columns:1; } }
+  </style>
+</head>
+<body>
+
+  <!-- ══ HERO ══ -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-shape1"></div>
+    <div class="hero-shape2"></div>
+    <div class="hero-content">
+      <div class="hero-flags">🇧🇷 🇫🇷 🇲🇽</div>
+      <h1 class="hero-title">
+        Fierro Viejo
+        <span class="y">y</span>
+        <span class="familia">Familia</span>
+      </h1>
+      <p class="hero-sub">4 años · 30+ viajes · 1 familia · México</p>
+    </div>
+    <div class="hero-scroll">scroll</div>
+  </section>
+
+  <!-- ══ LIGHTBOX ══ -->
+  <div id="lightbox" onclick="handleLbClick(event)">
+    <div class="lb-close" onclick="closeLb()">✕</div>
+    <div class="lb-nav lb-prev" onclick="event.stopPropagation();lbNav(-1)">‹</div>
+    <img id="lightbox-img" src="" alt="" />
+    <div class="lb-nav lb-next" onclick="event.stopPropagation();lbNav(1)">›</div>
+    <div class="lb-counter" id="lb-counter"></div>
+  </div>
+
+  <!-- ══ CIUDAD DE MÉXICO ══ -->
+  <div class="sec-header reveal">
+    <div>
+      <p class="sec-tag">Cotidiano · 2021 – 2024</p>
+      <h2 class="sec-title">Ciudad de <em>México</em></h2>
+    </div>
+    <span class="sec-count">30+ fotos</span>
+  </div>
+  <div class="gallery-wrap">
+    <div class="gallery-mosaic" id="gallery-cdmx"></div>
+  </div>
+
+  <!-- ══ VIAJES ══ -->
+  <div class="sec-header reveal">
+    <div>
+      <p class="sec-tag">2021 – 2026</p>
+      <h2 class="sec-title">Todos los <em>viajes</em></h2>
+    </div>
+    <span class="sec-count">30+ destinos · 6 países</span>
+  </div>
+
+  <!-- MAP -->
+  <div class="map-wrap reveal">
+    <div class="map-box"><div id="leaflet-map"></div></div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="timeline-wrap">
+
+    <div class="year-block reveal">
+      <div class="year-label">2026</div>
+      <div class="trip-row">
+        <div class="trip-date">Fev</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Sayulita 🏄</span><span class="trip-place">Nayarit · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="year-block reveal">
+      <div class="year-label">2025</div>
+      <div class="trip-row">
+        <div class="trip-date">Dez</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Los Angeles & Parques Naturales 🌲</span><span class="trip-place">California · EUA</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Dez</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">França — Noël 🇫🇷</span><span class="trip-place">França</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Ago</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Brasil 🇧🇷</span><span class="trip-place">Brasil</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Jun</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">França — Verão 🇫🇷</span><span class="trip-place">França</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Abr</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Guatemala 🌋</span><span class="trip-place">Guatemala</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="year-block reveal">
+      <div class="year-label">2024</div>
+      <div class="trip-row">
+        <div class="trip-date">Nov</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Costa Rica 🦜</span><span class="trip-place">Costa Rica</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Set</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Puebla 🏛️</span><span class="trip-place">Puebla · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Jul</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Acapulco 🌊</span><span class="trip-place">Guerrero · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Mai</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Ixtapa 🏖️</span><span class="trip-place">Guerrero · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Mar</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Oaxaca 🎨</span><span class="trip-place">Oaxaca · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Fev</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Tulum & Bacalar 🐚</span><span class="trip-place">Quintana Roo · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="year-block reveal">
+      <div class="year-label">2023</div>
+      <div class="trip-row">
+        <div class="trip-date">Nov</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Tula 🗿</span><span class="trip-place">Hidalgo · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Out</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Brasil 🇧🇷</span><span class="trip-place">Brasil</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Set</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Panamá 🌉</span><span class="trip-place">Panamá</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Ago</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Cuba 🎺</span><span class="trip-place">Cuba</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Abr</div>
+        <div class="trip-content">
+          <div class="trip-info">
+            <span class="trip-name">Viagem Vô Luiz 👴</span>
+            <span class="trip-place">San Miguel de Allende · Guanajuato · San Luis Potosí · Papantla</span>
+          </div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Mar</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Taxco 🏺</span><span class="trip-place">Guerrero · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">—</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Valladolid · Mérida · Holbox 🦩</span><span class="trip-place">Yucatán · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="year-block reveal">
+      <div class="year-label">2022</div>
+      <div class="trip-row">
+        <div class="trip-date">Dez</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Puerto Escondido 🌊</span><span class="trip-place">Oaxaca · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Nov</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Valle de Bravo 🌲</span><span class="trip-place">Estado de México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Out</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Cuernavaca & Tepoztlán 🌸</span><span class="trip-place">Morelos · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Out</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Puebla 🏛️</span><span class="trip-place">Puebla · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">Ago</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Puerto Escondido 🌊</span><span class="trip-place">Oaxaca · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">—</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Baja California 🐋</span><span class="trip-place">Baja California Sur · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="year-block reveal">
+      <div class="year-label" style="font-size:2rem;opacity:0.05">EUA & outros</div>
+      <div class="trip-row">
+        <div class="trip-date">—</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Las Vegas · Grand Canyon · Joshua Tree 🏜️</span><span class="trip-place">Nevada · Arizona · California · EUA</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">—</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Nova York 🗽</span><span class="trip-place">New York · EUA</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">—</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Miami & Orlando 🌴</span><span class="trip-place">Florida · EUA</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">—</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Austin · San Antonio · Houston 🤠</span><span class="trip-place">Texas · EUA</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+      <div class="trip-row">
+        <div class="trip-date">—</div>
+        <div class="trip-content">
+          <div class="trip-info"><span class="trip-name">Playa del Carmen & Las Estacas 🤿</span><span class="trip-place">Quintana Roo · Morelos · México</span></div>
+          <div class="trip-right"><span class="trip-soon">Em breve</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-logo">FVyF</div>
+    <p class="footer-text">🇧🇷 🇫🇷 🇲🇽 · 2021 – 2026 · Hecho con amor, tacos y algo de nostalgia</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+    /* ── GALLERY ── */
+    const photos = [
+      "https://lh3.googleusercontent.com/pw/AP1GczOE0PmmeVnSHy31ssMsn899X59xphGpU8hFs6H8ESw1z3idLtLWIuDUwWxEwMQnc-yXm1tFCghQTonQ69WB10XcNUWGMa7Jc6qHH6yP8FkckETk-cT-",
+      "https://lh3.googleusercontent.com/pw/AP1GczMtbOhGjYJHtiyrk4IlYl7AWKWO2kwn348frmc0gbcQdVUaafYWRHwCeEGKn-e1ohM_QV6Ia-mrvjocWLPj0Z_gXH81fyuT0wFMmmnwh5ZBN0cCOOat",
+      "https://lh3.googleusercontent.com/pw/AP1GczP3cf3bmMThTP9zh0u23NxU0E8ld58mJrqSkwu6GpxKUZPJKds6l3VMjUIrgHH1ph8bVcPbn2XogVzpRjzkkmfUTe-RfU0ykz9xZpiJ2b7VBBZck3Xl",
+      "https://lh3.googleusercontent.com/pw/AP1GczMqPjpW0EZ9gmOudEmExu4EXAVq6UKzN_pqwDgW8w4gMYGRdRdUCQS1jNu5uT01PCXEY0er2MpGVScJcX2OvwkHVefr0PNUJodSOwKnKQCaHa3tIodg",
+      "https://lh3.googleusercontent.com/pw/AP1GczM-7Fm2goQz7e3YCVKpB6cPlYkDfkCPIfu1Hp8g1GtQ1PUMfptueWFxrNhjW93sf33Z5JAlxC9iwo23B_cwaffcrQkOTt6Arb_UydrUiuvyfMELk_rn",
+      "https://lh3.googleusercontent.com/pw/AP1GczNDQORPm14LqMpZUmQzZqmdvAhAezQK7wZcuDdyep7LXQlleickQh_qnax34AZAv26J00GMoMH9GRizqfIjtnuMXnb7fHLkKh8RpSz1rg_o30K_Vv7R",
+      "https://lh3.googleusercontent.com/pw/AP1GczOc9ovSSgLJy-eWOf9GNCzzWGLJ0O3VPNrpI1PSPsWLMDT6b7r3F1jd9D6HOJqnYaA2x6AMZbEGLS2X3GWElJKrjpvPt0D5UA7bgjY68e7ZFOl2pcIs",
+      "https://lh3.googleusercontent.com/pw/AP1GczNcL8_fb4VXHgasvEAbOMitOnvSy3NDJup3Wkw4Xjk52YChWFyx0P70QzjDjnNPL_lIdF4brdzKxC_PfYy8PmZ6OItfCC0jeKac5MIT6HPDuWGJJ6RE",
+      "https://lh3.googleusercontent.com/pw/AP1GczMWpdrUo6NDSJbbvKfyIWUALzavR8CLV69HKZ5i7H0snnVrhoF4T69wnFGJK57OCABA6BTcVhr6HAOIqLmTYsXbrw3xPT-fgJhyp6_CqW3W9PKIPWXm",
+      "https://lh3.googleusercontent.com/pw/AP1GczNaudFm3EFYs19ZnSTqhK2rZQeoo6gDdMa9hfdYRyN2zCgehynbY-NVPEqHpev_2MHBQvUH1q_JwDv6JsAHyCtaoLe4trBxeGG5VxzI3cd-SXZQXG_O",
+      "https://lh3.googleusercontent.com/pw/AP1GczOMw1CKswZmryyYaM7Y5SS3RoutJyyEejFfPVH2Y58AkDypgHCvfbZsTimx7FRr-90jmgayYSqhIIFIshxIIprYIwM_CpRMWAFWloA4iFHV1ZrDUNYr",
+      "https://lh3.googleusercontent.com/pw/AP1GczPO6SQ2acYnDhLH_gp-qJ7WjoFxRzqRjzLNuD0n_naqquivh9YBcWNRkq0cjiUbbS4AM887Wk9X5g1WdqHda4GW8N2C7-Ah0Z_n5NyKPvE_1LmKlB0J",
+      "https://lh3.googleusercontent.com/pw/AP1GczNtW_0hs8dUxQzhisVxoNQWTxIm_ys1rQtwUc0WoeWEITA3EZ9dSORbUSczP5e7AGH4MTjGcz0Jq0cpKmD1JFFHF6ZlmTrPMucP8rM6lgFC1qw5yM4M",
+      "https://lh3.googleusercontent.com/pw/AP1GczNV1m-n9ctgJV2i2qAz3YkZGCUbiVK1-FFimxq22W3ENBoWcmsq3PN6aINauQuTTiphQ8Q0FAVkFt-pa0jww-A1fz5GH-wH_lP2AclJDY8L4VSdTf2-",
+      "https://lh3.googleusercontent.com/pw/AP1GczN8c8xDhtyPDkd45INzs1AM5h2ZsDONw9_Uyq_sJ3KuOk_9Bo5R_AUgvlefJkdk-RPsi3c20j_HYArGNyLVoyCU-JxJjAEdgzHYMJNCVeqEnNYxIAeO",
+      "https://lh3.googleusercontent.com/pw/AP1GczP_wVfjLwuR8Eeyq4nfIrjF4pxy8i6mKg_wo2IUbimm2GdEvWjZrtjpcA7368UGDgNg8kX5g9IyfJjbWRa--1q3PIDZ-UWAd6HF1fiH1NL0fzPkgEeV",
+      "https://lh3.googleusercontent.com/pw/AP1GczNgsOAy5FnA5NLSkp8Q01JI-meYF0_k3gc9HNrPYmQBAMw8F3OpZc17IhPzTkT9quyPniqxs8jueIyAbyWeU6AMssSCnY7P3UJsQ7fTEHCZZOGO4LO3",
+      "https://lh3.googleusercontent.com/pw/AP1GczPlu9Wn4YlrKf6iQ_p_P0P5hh5HRBM1_gFKlpujYpN6knmE0_OhjgVreHC1wahVrp_7SaqARnVcpE1OPPAsBN4kF6ACR3-Vx1h2xcR84aEPnJ04TQtz",
+      "https://lh3.googleusercontent.com/pw/AP1GczP_c69U8MkJAEsOkyMRJy2RnircMQGP9kDlce2w4ycp2mA-C9C0RjN-JeS01XtzXbIzgCmtlky06LtJfXznPfN1k3apaAbNGLizlU_3V67pRSUONomP",
+      "https://lh3.googleusercontent.com/pw/AP1GczMuNIGvvXhMPPSvNBoEH3A4Rpu61ZsTjnA0c87nUnpfCl6K5oFv-vf6LSxZRAcbDMeJ3TUWtXX0padD-iy4GUXTFJBviBjaZ9l9aLh8bsJQCKW91fcr",
+      "https://lh3.googleusercontent.com/pw/AP1GczPhuqIDfjpHenX1h3CIu7QBoDJKebRG6P91P6TtOfZ5X7afjUcEzq7JUZCvB6Xt2feRpazpTm-qqQmQxpT153HXrgIUrCvKS5PgjcJ_OckAhn3fNm0e",
+      "https://lh3.googleusercontent.com/pw/AP1GczPxoNhPs_dLrxpJsrf65lrc5uL15R3iMQV7heQdy3CfypA7FVy6b7pKxU7cX0C2oipQED3VGoRLoosH58AQtpw6QcRNVfhguzLUExZkEF3oSk5GL9XJ",
+      "https://lh3.googleusercontent.com/pw/AP1GczOfvE_eoQ0-KssuXAU8A0sa3yLqMCFIfcW4BsPzCYeHAlDsljM-E3NVppwxLv693I7mj28mH3Xn3TWgIn6QLqGzR5oRt2wFnkBs1zAAHImZQ2Oh3oyw",
+      "https://lh3.googleusercontent.com/pw/AP1GczPS_xy1OB4kvk8X7F3tOfd10iegr_8pJtM9O3aWESoVwM6yO1J1vyxGi0B1Pnc2q4z8lythBoX7ijqLuPY0_tfgVGWoked1v_bmT8yx3NzzhB5XLoXq",
+      "https://lh3.googleusercontent.com/pw/AP1GczOtaA7pGDsB9mxYBgC7gVVlyT0HAmiCRAgY99LEOJqjvfnp1WEELKCz3J5xBJSJzb0hvhfZMw6mbXTCqYArGvgkj_r0liPit0c_PiDMlhrirRKkz-p_",
+      "https://lh3.googleusercontent.com/pw/AP1GczNI8l9MS0L_NszVmjMthyiBOgcDXaRbaPpnJLy5woxY7X5MOjzLnTTljG3VuxBD45IUqVUc5mkRWcNHQSdIyDOwUSxEby2KeeuHqhUGglt8pEqWCPUZ",
+      "https://lh3.googleusercontent.com/pw/AP1GczMqmGgfPhgJP29PoQSrbHfDXMO6MxC1GM5YE20uVu6mckglPwbitFgISTE-Mqaz1oa7XcPDp3q50tkAldXcJtFR7syXrAO3Bu1sOGDYI_Xl4YreZtt5",
+      "https://lh3.googleusercontent.com/pw/AP1GczPmscZMorSgTGUcgOGQjtteaioFkHg3w_qLIN6a7T4E7GSWvAF757CXno24uPk5ezRFwbDk4IgV64woPyEgM9FEUFgpMAYIZfc5p_vr7GzCzw_r3kdy",
+      "https://lh3.googleusercontent.com/pw/AP1GczOU-mkZEqgK6SD6HbLasot9q7_wfy5Txo5d5aflmFhN9ubxLnhX1t8ocqpw2aFtJlzreXnnv14M0EEYk3PE5MIuq4OTbra8ZrDG11FLsi1Cs-lppRvz",
+    ];
+
+    let lbIdx = 0;
+    const grid = document.getElementById('gallery-cdmx');
+    photos.forEach((base, i) => {
+      const el = document.createElement('div');
+      el.className = 'gallery-item';
+      el.innerHTML = `<img src="${base}=w600" loading="lazy" alt="CDMX ${i+1}"/><div class="gallery-item-overlay"><span>⊕</span></div>`;
+      el.addEventListener('click', () => openLb(i));
+      grid.appendChild(el);
+    });
+
+    function openLb(i) {
+      lbIdx = i;
+      document.getElementById('lightbox-img').src = photos[lbIdx] + '=w1600';
+      document.getElementById('lb-counter').textContent = `${lbIdx+1} / ${photos.length}`;
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLb() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function lbNav(dir) {
+      lbIdx = (lbIdx + dir + photos.length) % photos.length;
+      const img = document.getElementById('lightbox-img');
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = photos[lbIdx] + '=w1600';
+        img.style.opacity = '1';
+        document.getElementById('lb-counter').textContent = `${lbIdx+1} / ${photos.length}`;
+      }, 150);
+    }
+    function handleLbClick(e) { if (e.target.id === 'lightbox') closeLb(); }
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (e.key === 'Escape') closeLb();
+      if (e.key === 'ArrowRight') lbNav(1);
+      if (e.key === 'ArrowLeft') lbNav(-1);
+    });
+
+    /* ── MAP ── */
+    const map = L.map('leaflet-map', { center:[20,-93], zoom:4, scrollWheelZoom:false });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution:'© OpenStreetMap © CARTO', maxZoom:19
+    }).addTo(map);
+
+    const pin = L.divIcon({ className:'', html:`<div style="width:9px;height:9px;border-radius:50%;background:#C8553D;border:2px solid #E8A838;box-shadow:0 0 7px rgba(200,85,61,0.7);"></div>`, iconSize:[9,9], iconAnchor:[4,4] });
+    const home = L.divIcon({ className:'', html:`<div style="width:13px;height:13px;border-radius:50%;background:#E8A838;border:2px solid #F5EDD8;box-shadow:0 0 10px rgba(232,168,56,0.9);"></div>`, iconSize:[13,13], iconAnchor:[6,6] });
+
+    [
+      { name:"🏠 Ciudad de México", lat:19.4326, lng:-99.1332, h:true },
+      { name:"Sayulita", lat:20.8691, lng:-105.4411 },
+      { name:"Los Angeles", lat:34.0549, lng:-118.2426 },
+      { name:"Las Vegas", lat:36.1699, lng:-115.1398 },
+      { name:"Grand Canyon", lat:36.0544, lng:-112.1401 },
+      { name:"Joshua Tree", lat:33.8734, lng:-115.9010 },
+      { name:"Nova York", lat:40.7128, lng:-74.0060 },
+      { name:"Miami", lat:25.7617, lng:-80.1918 },
+      { name:"Orlando", lat:28.5383, lng:-81.3792 },
+      { name:"Austin", lat:30.2672, lng:-97.7431 },
+      { name:"San Antonio", lat:29.4241, lng:-98.4936 },
+      { name:"Houston", lat:29.7604, lng:-95.3698 },
+      { name:"Guatemala", lat:14.6349, lng:-90.5069 },
+      { name:"Costa Rica", lat:9.9281, lng:-84.0907 },
+      { name:"Panamá", lat:8.9824, lng:-79.5199 },
+      { name:"Cuba", lat:23.1336, lng:-82.3586 },
+      { name:"Puebla", lat:19.0414, lng:-98.2063 },
+      { name:"Acapulco", lat:16.8640, lng:-99.8823 },
+      { name:"Ixtapa", lat:17.6635, lng:-101.5931 },
+      { name:"Oaxaca", lat:17.0732, lng:-96.7266 },
+      { name:"Puerto Escondido", lat:15.8676, lng:-97.0799 },
+      { name:"Tulum", lat:20.2114, lng:-87.4654 },
+      { name:"Bacalar", lat:18.6779, lng:-88.3901 },
+      { name:"Valladolid", lat:20.6896, lng:-88.2022 },
+      { name:"Mérida", lat:20.9674, lng:-89.5926 },
+      { name:"Holbox", lat:21.5308, lng:-87.2867 },
+      { name:"Playa del Carmen", lat:20.6296, lng:-87.0739 },
+      { name:"Tula", lat:20.0558, lng:-99.3424 },
+      { name:"Taxco", lat:18.5565, lng:-99.6051 },
+      { name:"Valle de Bravo", lat:19.1951, lng:-100.1327 },
+      { name:"Cuernavaca", lat:18.9242, lng:-99.2216 },
+      { name:"Tepoztlán", lat:18.9848, lng:-99.0931 },
+      { name:"Baja California", lat:24.1426, lng:-110.3128 },
+      { name:"Las Estacas", lat:18.7833, lng:-98.9833 },
+      { name:"San Miguel de Allende", lat:20.9144, lng:-100.7452 },
+      { name:"Guanajuato", lat:21.0190, lng:-101.2574 },
+      { name:"San Luis Potosí", lat:22.1565, lng:-100.9855 },
+      { name:"Papantla", lat:20.4481, lng:-97.3214 },
+    ].forEach(d => L.marker([d.lat,d.lng],{icon:d.h?home:pin}).addTo(map).bindPopup(`<b style="font-family:serif;color:#1A1208;font-size:13px">${d.name}</b>`));
+
+    /* ── SCROLL REVEAL ── */
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e,i) => { if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),i*60); obs.unobserve(e.target); } });
+    }, { threshold:0.05 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  </script>
+</body>
+</html>
